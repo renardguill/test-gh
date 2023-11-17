@@ -2,20 +2,27 @@ name: GitHub Actions Test
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  prepare-matrix:
+  prepare-matrix-from-cake:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-    - name: Check out repository code
-      uses: actions/checkout@v4
-    - id: set-matrix
-      # run: echo "matrix={\"include\":[{\"cluster\":\"cluster-1\"},{\"cluster\":\"cluster-2\"}]}" >> $GITHUB_OUTPUT
-      run: python3 create-matrix.py
+    - name: Run the Cake script
+      id: set-matrix
+      uses: cake-build/cake-action@v1
+  # prepare-matrix:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     matrix: ${{ steps.set-matrix.outputs.matrix }}
+  #   steps:
+  #   - name: Check out repository code
+  #     uses: actions/checkout@v4
+  #   - id: set-matrix
+  #     run: python3 create-matrix.py
   cluster-action:
-    needs: prepare-matrix
+    needs: prepare-matrix-from-cake
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.prepare-matrix.outputs.matrix)}}
+      matrix: ${{fromJson(needs.prepare-matrix-from-cake.outputs.matrix)}}
     steps:
     - run: echo ${{ matrix.cluster }}
