@@ -6,4 +6,4 @@ matrix = {
         {"cluster": "cluster-2",},
     ],
 }
-os.environ["GITHUB_OUTPUT"] = json.dumps(matrix).replace('"', '\\"').replace(" ", "")
+print("matrix=" + json.dumps(matrix).replace('"', '\\"').replace(" ", ""), end="")
