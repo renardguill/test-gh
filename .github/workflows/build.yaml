@@ -10,7 +10,7 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v4
     - id: set-matrix
-      run: echo "::set-output name=matrix::{\"include\":[{\"cluster\":\"cluster-1\"},{\"cluster\":\"cluster-2\"}]}"
+      run: echo "matrix={\"include\":[{\"cluster\":\"cluster-1\"},{\"cluster\":\"cluster-2\"}]}" >> $GITHUB_OUTPUT
       # run: python create-matrix.py
   cluster-action:
     needs: prepare-matrix
