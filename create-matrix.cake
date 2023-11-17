@@ -11,7 +11,7 @@ clusters.Add(new Cluster { Name = "cluster-1", ManifestPath = "cluster-1.yaml" }
 clusters.Add(new Cluster { Name = "cluster-2", ManifestPath = "cluster-2.yaml" });
 clusters.Add(new Cluster { Name = "cluster-3", ManifestPath = "cluster-3.yaml" });
 
-var clusterMatrix = new Dictionary<string, List<Cluster>> {
+var clustersMatrix = new Dictionary<string, List<Cluster>> {
     { "include", clusters }
 };
 
@@ -21,9 +21,9 @@ Task("default").Does(() =>
     {
         Information("Running on GitHub Actions");
 
-        var clusterMatrixString = JsonSerializer.Serialize(clusterMatrix);
-        Information($"Cluster matrix: {clusterMatrixString}");
-        BuildSystem.GitHubActions.Commands.SetOutputParameter("clusters-matrix", clusterMatrixString);
+        var clustersMatrixString = JsonSerializer.Serialize(clustersMatrix);
+        Information($"Cluster matrix: {clustersMatrixString}");
+        BuildSystem.GitHubActions.Commands.SetOutputParameter("clusters-matrix", clustersMatrixString);
         Information($"Workflow Ref: {BuildSystem.GitHubActions.Environment.Workflow.Ref}");
         Information($"Workflow RefName: {BuildSystem.GitHubActions.Environment.Workflow.RefName}");
         Information($"Workflow RefType: {BuildSystem.GitHubActions.Environment.Workflow.RefType}");
