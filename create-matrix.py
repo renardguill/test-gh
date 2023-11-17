@@ -6,4 +6,4 @@ matrix = {
         {"cluster": "cluster-2",},
     ],
 }
-print("matrix=" + json.dumps(matrix).replace('"', '\\"').replace(" ", ""))
+print("matrix=" + json.dumps(matrix).replace('"', '\\"').replace(" ", ""), end="")
