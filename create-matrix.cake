@@ -20,12 +20,16 @@ Task("default").Does(() =>
     if (BuildSystem.IsRunningOnGitHubActions)
     {
         Information("Running on GitHub Actions");
-        BuildSystem.GitHubActions.Commands.SetOutputParameter("clusters-matrix", JsonSerializer.Serialize(clusterMatrix));
+
+        var clusterMatrixString = JsonSerializer.Serialize(clusterMatrix);
+        Information($"Cluster matrix: {clusterMatrixString}");
+        BuildSystem.GitHubActions.Commands.SetOutputParameter("clusters-matrix", clusterMatrixString);
         Information($"Workflow Ref: {BuildSystem.GitHubActions.Environment.Workflow.Ref}");
         Information($"Workflow RefName: {BuildSystem.GitHubActions.Environment.Workflow.RefName}");
         Information($"Workflow RefType: {BuildSystem.GitHubActions.Environment.Workflow.RefType}");
+        Information($"Workflow IsPullRequest: {BuildSystem.IsPullRequest}");
         Information($"Workflow BaseRef: {BuildSystem.GitHubActions.Environment.Workflow.BaseRef}");
-        Information($"Workflow BaseRef: {BuildSystem.GitHubActions.Environment.Workflow.Workspace}");
+        Information($"Workflow Workspace: {BuildSystem.GitHubActions.Environment.Workflow.Workspace}");
         
     }
     else
