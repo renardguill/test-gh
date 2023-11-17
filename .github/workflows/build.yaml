@@ -5,43 +5,71 @@ jobs:
   ###########################################
   #               With Cake                 #
   ###########################################
-  prepare-matrix-from-cake:
+  matrix-cake:
     runs-on: ubuntu-latest
     outputs:
-      clusters-matrix: ${{ steps.set-matrix-from-cake.outputs.cluster-matrix }}
+      clusters-matrix: ${{ steps.set-matrix.outputs.cluster-matrix }}
     steps:
     - name: Check out repository code
       uses: actions/checkout@v4
     - name: Run the Cake script
-      id: set-matrix-from-cake
+      id: set-matrix
       uses: cake-build/cake-action@v1
       with:
         script-path: create-matrix.cake
-  cluster-action-from-cake-matrix:
-    needs: prepare-matrix-from-cake
+  c-cluster-actions:
+    needs: matrix-cake
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.prepare-matrix-from-cake.outputs.clusters-matrix)}}
+      matrix: ${{fromJson(needs.matrix-cake.outputs.clusters-matrix)}}
       max-parallel: 3
+    environment: 
+      name: ${{ matrix.ClusterName }}
+      url: https://${{ matrix.ClusterName }}.luccakube.tech
     steps:
-    - run: echo ${{ matrix.name }}
+    - run: echo ${{ matrix.ClusterName }} -> ${{ matrix.ManifestPath }} $OS_AUTH_URL $OS_IDENTITY_API_VERSION $OS_DOMAIN_NAME $OS_TENANT_ID $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_REGION_NAME $OVH_API_CREDS
+      env:
+        TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
+        OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
+        OS_IDENTITY_API_VERSION: ${{ vars.OS_IDENTITY_API_VERSION }}
+        OS_DOMAIN_NAME: ${{ vars.OS_DOMAIN_NAME }}
+        OS_TENANT_ID: ${{ secrets.OS_TENANT_ID }}
+        OS_TENANT_NAME: ${{ secrets.OS_TENANT_NAME }}
+        OS_USERNAME: ${{ secrets.OS_USERNAME }}
+        OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
+        OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
+        OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   ###########################################
   #              With Python                #
   ###########################################
-  prepare-matrix-from-python:
+  matrix-python:
       runs-on: ubuntu-latest
       outputs:
-        clusters-matrix: ${{ steps.set-matrix-from-pyhton.outputs.clusters-matrix }}
+        clusters-matrix: ${{ steps.set-matrix.outputs.clusters-matrix }}
       steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - id: set-matrix-from-pyhton
+      - id: set-matrix
         run: python3 create-matrix.py
-  cluster-action-from-python-matrix:
-    needs: prepare-matrix-from-python
+  p-cluster-actions:
+    needs: matrix-python
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.prepare-matrix-from-python.outputs.clusters-matrix)}}
+      matrix: ${{fromJson(needs.matrix-python.outputs.clusters-matrix)}}
       max-parallel: 3
+    environment: 
+      name: ${{ matrix.ClusterName }}
+      url: https://${{ matrix.ClusterName }}.luccakube.tech
     steps:
-    - run: echo ${{ matrix.name }} ${{ matrix.manifestpath }}
+    - run: echo ${{ matrix.ClusterName }} -> ${{ matrix.ManifestPath }} $OS_AUTH_URL $OS_IDENTITY_API_VERSION $OS_DOMAIN_NAME $OS_TENANT_ID $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_REGION_NAME $OVH_API_CREDS
+      env:
+        TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
+        OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
+        OS_IDENTITY_API_VERSION: ${{ vars.OS_IDENTITY_API_VERSION }}
+        OS_DOMAIN_NAME: ${{ vars.OS_DOMAIN_NAME }}
+        OS_TENANT_ID: ${{ secrets.OS_TENANT_ID }}
+        OS_TENANT_NAME: ${{ secrets.OS_TENANT_NAME }}
+        OS_USERNAME: ${{ secrets.OS_USERNAME }}
+        OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
+        OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
+        OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}

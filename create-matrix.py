@@ -3,9 +3,9 @@ import json
 
 clusters_matrix = {
     "include": [ 
-        {"name": "cluster-1", "manifestPath": "cluster-1.yaml",},
-        {"name": "cluster-2", "manifestPath": "cluster-2.yaml",},
-        {"name": "cluster-3", "manifestPath": "cluster-3.yaml",},
+        {"ClusterName": "cluster-1", "ManifestPath": "cluster-1.yaml",},
+        {"ClusterName": "cluster-2", "ManifestPath": "cluster-2.yaml",},
+        {"ClusterName": "cluster-3", "ManifestPath": "cluster-3.yaml",},
     ],
 }
 
