@@ -1,3 +1,4 @@
+import os
 import json
 matrix = {
     "include": [ 
@@ -6,4 +7,4 @@ matrix = {
         {"cluster": "cluster-3",},
     ],
 }
-print("::set-output name=matrix::" + json.dumps(matrix))
+os.environ["GITHUB_OUTPUT"] = "matrix=" + json.dumps(matrix)

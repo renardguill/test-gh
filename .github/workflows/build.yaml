@@ -15,6 +15,6 @@ jobs:
     needs: prepare-matrix
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.job1.outputs.matrix)}}
+      matrix: ${{fromJson(needs.prepare-matrix.outputs.matrix)}}
     steps:
     - run: echo ${{ matrix.project }}
