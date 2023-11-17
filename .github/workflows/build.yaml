@@ -11,7 +11,7 @@ jobs:
       uses: actions/checkout@v4
     - id: set-matrix
       # run: echo "matrix={\"include\":[{\"cluster\":\"cluster-1\"},{\"cluster\":\"cluster-2\"}]}" >> $GITHUB_OUTPUT
-      run: $GITHUB_OUTPUT=$(python create-matrix.py)
+      run: GITHUB_OUTPUT="$(python3 create-matrix.py)" && echo $GITHUB_OUTPUT
   cluster-action:
     needs: prepare-matrix
     runs-on: ubuntu-latest
