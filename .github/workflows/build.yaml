@@ -2,29 +2,46 @@ name: GitHub Actions Test
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
+  ###########################################
+  #               With Cake                 #
+  ###########################################
   prepare-matrix-from-cake:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      clusters-matrix: ${{ steps.set-matrix-from-cake.outputs.cluster-matrix }}
     steps:
     - name: Check out repository code
       uses: actions/checkout@v4
     - name: Run the Cake script
-      id: set-matrix
+      id: set-matrix-from-cake
       uses: cake-build/cake-action@v1
-  # prepare-matrix:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     matrix: ${{ steps.set-matrix.outputs.matrix }}
-  #   steps:
-  #   - name: Check out repository code
-  #     uses: actions/checkout@v4
-  #   - id: set-matrix
-  #     run: python3 create-matrix.py
-  cluster-action:
+      with:
+        script-path: create-matrix.cake
+  cluster-action-from-cake-matrix:
     needs: prepare-matrix-from-cake
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.prepare-matrix-from-cake.outputs.matrix)}}
+      matrix: ${{fromJson(needs.prepare-matrix-from-cake.outputs.clusters-matrix)}}
+      max-parallel: 1
     steps:
-    - run: echo ${{ matrix.cluster }}
+    - run: echo ${{ matrix.name }}
+  ###########################################
+  #              With Python                #
+  ###########################################
+  prepare-matrix-from-python:
+      runs-on: ubuntu-latest
+      outputs:
+        clusters-matrix: ${{ steps.set-matrix-from-pyhton.outputs.clusters-matrix }}
+      steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - id: set-matrix-from-pyhton
+        run: python3 create-matrix.py
+  cluster-action-from-python-matrix:
+    needs: prepare-matrix-from-python
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(needs.prepare-matrix-from-python.outputs.clusters-matrix)}}
+      max-parallel: 1
+    steps:
+    - run: echo ${{ matrix.name }} ${{ matrix.manifestpath }}

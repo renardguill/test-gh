@@ -1,15 +1,18 @@
 using System.Text.Json;
 
-var clusterMatrix = new Dictionary<string, Dictionary<string, string>[]>
-{
-    { 
-        "include", new []
-        {
-            new Dictionary<string, string> { { "cluster", "cluster-1" }},
-            new Dictionary<string, string> { { "cluster", "cluster-2" }},
-            new Dictionary<string, string> { { "cluster", "cluster-3" }},
-        }
-    },
+private class Cluster {
+    public string Name { get; set; }
+    public string ManifestPath { get; set; }
+}
+
+
+var clusters = new List<Cluster>();
+clusters.Add(new Cluster { Name = "cluster-1", ManifestPath = "cluster-1.yaml" });
+clusters.Add(new Cluster { Name = "cluster-2", ManifestPath = "cluster-2.yaml" });
+clusters.Add(new Cluster { Name = "cluster-3", ManifestPath = "cluster-3.yaml" });
+
+var clusterMatrix = new Dictionary<string, List<Cluster>> {
+    { "include", clusters }
 };
 
 Task("default").Does(() =>
@@ -17,7 +20,7 @@ Task("default").Does(() =>
     if (BuildSystem.IsRunningOnGitHubActions)
     {
         Information("Running on GitHub Actions");
-        BuildSystem.GitHubActions.Commands.SetOutputParameter("matrix", JsonSerializer.Serialize(clusterMatrix));
+        BuildSystem.GitHubActions.Commands.SetOutputParameter("clusters-matrix", JsonSerializer.Serialize(clusterMatrix));
         Information($"Workflow Ref: {BuildSystem.GitHubActions.Environment.Workflow.Ref}");
         Information($"Workflow RefName: {BuildSystem.GitHubActions.Environment.Workflow.RefName}");
         Information($"Workflow RefType: {BuildSystem.GitHubActions.Environment.Workflow.RefType}");
@@ -29,9 +32,9 @@ Task("default").Does(() =>
     {
         Information("Running locally");
         Information("Cluster matrix:");
-        foreach (var cluster in clusterMatrix["include"])
+        foreach (var cluster in clusters)
         {
-            Information($"  {cluster["cluster"]}");
+            Information($"{cluster.Name} => {cluster.ManifestPath}");
         }
     }
 });

@@ -1,12 +1,13 @@
 import os
 import json
 
-matrix = {
+cluster_matrix = {
     "include": [ 
-        {"cluster": "cluster-1",},
-        {"cluster": "cluster-2",},
+        {"name": "cluster-1", "manifestPath": "cluster-1.yaml",},
+        {"name": "cluster-2", "manifestPath": "cluster-2.yaml",},
+        {"name": "cluster-3", "manifestPath": "cluster-3.yaml",},
     ],
 }
 
 with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
-    f.write("matrix=" + json.dumps(matrix).strip().replace(" ", ""))
+    f.write("clusters-matrix=" + json.dumps(cluster_matrix).strip().replace(" ", ""))
