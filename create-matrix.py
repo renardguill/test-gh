@@ -28,7 +28,7 @@ auth = Auth.Token(github.token)
 # Public Web Github
 g = Github(auth=auth)
 repo = g.get_repo(github.repository)
-pr = repo.get_pull(github.event.number)
+pr = repo.get_pull(1)
 print("pr files:")
 for file in pr.get_files():
     print(file.filename)
