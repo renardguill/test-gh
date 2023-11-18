@@ -14,5 +14,13 @@ with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
     f.write("max-parallel=3" + "\n")
     f.write("clusters-matrix=" + clustersMatrixString)
 
-# print content of env variable GITHUB_CONTEXT
-print(os.environ.get('GITHUB_CONTEXT'))
+
+# convert json string from env variable GITHUB_CONTEXT to object
+github = json.loads(os.environ.get('GITHUB_CONTEXT'))
+print("diff_url:")
+print(github['diff_url'])
+
+print("GITHUB_ENV:")
+# print content of file in env variable GITHUB_ENV
+with open(os.environ.get('GITHUB_ENV')) as f:
+    print(f.read())
