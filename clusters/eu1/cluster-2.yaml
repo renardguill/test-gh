@@ -1,0 +1,26 @@
+name: cluster-2
+provider: OVH
+endpoint: "https://foo.lucca.tech:443"
+secretStore: "s3://toto"
+talosVersion: "v1.6"
+kubeVersion: "v1.28"
+contolPlaneNodes:
+  - name: foobar001
+    type: Baremetal
+  - name: foobar002
+    type: OpenStack
+    flavor: "b2-7"
+  - name: foobar003
+    type: Baremetal
+workerNodes:
+  - name: foobar004
+    type: Baremetal
+  - name: foobar005
+    type: OpenStack
+    flavor: "b2-7"
+workerGroups:
+  - name: "group-1"
+    type: openstack
+    flavor: "b2-7"
+    instances: 2
+    max_instances: 3

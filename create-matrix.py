@@ -7,6 +7,8 @@ from github import Auth
 # convert json string from env variable GITHUB_CONTEXT to object
 github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
 
+
+clusters_matrix = {}
 # GetEnvironmentString("GITHUB_EVENT_NAME") == "pull_request"
 if github_context.event_name == "pull_request":
     # using an access token
@@ -17,16 +19,11 @@ if github_context.event_name == "pull_request":
     pr = repo.get_pull(1)
     print("pr files:")
     for file in pr.get_files():
-        print(file)
+        if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
+            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", ""), "ManifestPath": file.filename}]
+            print(file)
 
 
-clusters_matrix = {
-    "include": [ 
-        {"ClusterName": "cluster-1", "ManifestPath": "cluster-1.yaml",},
-        {"ClusterName": "cluster-2", "ManifestPath": "cluster-2.yaml",},
-        {"ClusterName": "cluster-3", "ManifestPath": "cluster-3.yaml",},
-    ],
-}
 clustersMatrixString = json.dumps(clusters_matrix).strip().replace(" ", "")
 with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
     f.write("max-parallel=3" + "\n")
