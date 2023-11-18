@@ -8,7 +8,7 @@ jobs:
   matrix-cake:
     runs-on: ubuntu-latest
     outputs:
-      clusters-matrix: ${{ steps.set-matrix.outputs.cluster-matrix }}
+      clusters-matrix: ${{ steps.set-matrix.outputs.clusters-matrix }}
     steps:
     - name: Check out repository code
       uses: actions/checkout@v4

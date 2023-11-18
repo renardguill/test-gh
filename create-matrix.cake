@@ -11,9 +11,6 @@ clusters.Add(new Cluster { ClusterName = "cluster-1", ManifestPath = "cluster-1.
 clusters.Add(new Cluster { ClusterName = "cluster-2", ManifestPath = "cluster-2.yaml" });
 clusters.Add(new Cluster { ClusterName = "cluster-3", ManifestPath = "cluster-3.yaml" });
 
-var clustersMatrix = new Dictionary<string, List<Cluster>> {
-    { "include", clusters }
-};
 
 Task("default").Does(() =>
 {
@@ -21,10 +18,22 @@ Task("default").Does(() =>
     {
         Information("Running on GitHub Actions");
 
+        if (BuildSystem.IsPullRequest)
+        {
+            clusters.Add(new Cluster { ClusterName = "cluster-4_tmp" + BuildSystem.GitHubActions.Environment.Workflow.RunId, ManifestPath = "cluster-4.yaml" });
+        }
+
+        var clustersMatrix = new Dictionary<string, List<Cluster>> {
+            { "include", clusters }
+        };
+
+        Information("GitHub Output:");
+        Information(EnvironmentVariable("GITHUB_OUTPUT"));
         var clustersMatrixString = JsonSerializer.Serialize(clustersMatrix);
         Information($"Cluster matrix: {clustersMatrixString}");
         BuildSystem.GitHubActions.Commands.SetOutputParameter("clusters-matrix", clustersMatrixString);
-        BuildSystem.GitHubActions.Commands.SetSecret("testSecret");
+        Information("GitHub Output:");
+        Information(EnvironmentVariable("GITHUB_OUTPUT"));
         Information($"Workflow Ref: {BuildSystem.GitHubActions.Environment.Workflow.Ref}");
         Information($"Workflow RefName: {BuildSystem.GitHubActions.Environment.Workflow.RefName}");
         Information($"Workflow RefType: {BuildSystem.GitHubActions.Environment.Workflow.RefType}");
