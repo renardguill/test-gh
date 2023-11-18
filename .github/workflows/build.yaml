@@ -55,6 +55,8 @@ jobs:
         uses: actions/checkout@v4
       - id: set-matrix
         run: python3 create-matrix.py
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
   cluster-actions-from-python:
     name: job - ${{ matrix.ClusterName }}
     needs: matrix-python

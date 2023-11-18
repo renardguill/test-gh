@@ -14,6 +14,5 @@ with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
     f.write("max-parallel=3" + "\n")
     f.write("clusters-matrix=" + clustersMatrixString)
 
-# list files in /opt
-for filename in os.listdir("/opt"):
-    print(filename)
+# print content of env variable GITHUB_CONTEXT
+print(os.environ.get('GITHUB_CONTEXT'))
