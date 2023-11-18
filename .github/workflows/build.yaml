@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJson(needs.matrix-cake.outputs.clusters-matrix)}}
-      max-parallel: 3
+      max-parallel: ${{ needs.matrix-cake.outputs.max-parallel }}
     environment: 
       name: ${{ matrix.ClusterName }}
       url: https://${{ matrix.ClusterName }}.luccakube.tech
