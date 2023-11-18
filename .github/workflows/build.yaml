@@ -83,7 +83,7 @@ jobs:
       url: https://${{ matrix.ClusterName }}.luccakube.tech
     steps:
     - name: step - ${{ matrix.ClusterName }}
-      run: echo ${{ matrix.ClusterName }} -> ${{ matrix.ManifestPath }} $OS_AUTH_URL $OS_IDENTITY_API_VERSION $OS_DOMAIN_NAME $OS_TENANT_ID $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_REGION_NAME $OVH_API_CREDS
+      run: echo ${{ matrix.ClusterName }} - ${{ matrix.ManifestPath }} $OS_AUTH_URL $OS_IDENTITY_API_VERSION $OS_DOMAIN_NAME $OS_TENANT_ID $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_REGION_NAME $OVH_API_CREDS
       env:
         TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
         OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
