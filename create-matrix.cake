@@ -7,9 +7,7 @@ private class Cluster {
 
 
 var clusters = new List<Cluster>();
-clusters.Add(new Cluster { ClusterName = "cluster-4", ManifestPath = "cluster-4.yaml" });
-clusters.Add(new Cluster { ClusterName = "cluster-5", ManifestPath = "cluster-5.yaml" });
-clusters.Add(new Cluster { ClusterName = "cluster-6", ManifestPath = "cluster-6.yaml" });
+
 
 
 
@@ -25,7 +23,10 @@ Task("default").Does(() =>
             clusters.Add(new Cluster { ClusterName = "cluster-6_" + BuildSystem.GitHubActions.Environment.Workflow.RunId, ManifestPath = "cluster-6-n+1.yaml" });
             BuildSystem.GitHubActions.Commands.SetOutputParameter("max-parallel", "1");
         } else {
-            BuildSystem.GitHubActions.Commands.SetOutputParameter("max-parallel", "3");
+            clusters.Add(new Cluster { ClusterName = "cluster-4", ManifestPath = "cluster-4.yaml" });
+            clusters.Add(new Cluster { ClusterName = "cluster-5", ManifestPath = "cluster-5.yaml" });
+            clusters.Add(new Cluster { ClusterName = "cluster-6", ManifestPath = "cluster-6.yaml" });
+            BuildSystem.GitHubActions.Commands.SetOutputParameter("max-parallel", "4");
         }
 
         var clustersMatrix = new Dictionary<string, List<Cluster>> {
