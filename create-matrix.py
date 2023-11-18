@@ -3,7 +3,6 @@ import json
 from types import SimpleNamespace
 from github import Github
 from github import Auth
-from github import PullRequest
 
 clusters_matrix = {
     "include": [ 
@@ -20,12 +19,12 @@ clusters_matrix = {
 
 # convert json string from env variable GITHUB_CONTEXT to object
 github = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
-print("diff_url:")
-print(github.event.pull_request.diff_url)
+# print("diff_url:")
+# print(github.event.pull_request.diff_url)
 
 
 # using an access token
-auth = Auth.Token(os.environ.get('GITHUB_TOKEN'))
+auth = Auth.Token(github.token)
 # Public Web Github
 g = Github(auth=auth)
 repo = g.get_repo(github.repository)
