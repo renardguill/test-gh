@@ -8,7 +8,7 @@ from github import Auth
 github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
 
 # GetEnvironmentString("GITHUB_EVENT_NAME") == "pull_request"
-if github_context.event.name == "pull_request":
+if github_context.event_name == "pull_request":
     # using an access token
     auth = Auth.Token(github_context.token)
     # Public Web Github
