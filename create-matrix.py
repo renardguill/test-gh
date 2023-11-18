@@ -12,5 +12,5 @@ clusters_matrix = {
 clustersMatrixString = json.dumps(clusters_matrix).strip().replace(" ", "")
 print(clustersMatrixString)
 with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
+    f.write("max-parallel=3" + "\n")
     f.write("clusters-matrix=" + clustersMatrixString)
-    f.write("max-parallel=3")
