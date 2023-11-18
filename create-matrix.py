@@ -20,7 +20,7 @@ clusters_matrix = {
 # convert json string from env variable GITHUB_CONTEXT to object
 github = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
 # print("diff_url:")
-# print(github.event.pull_request.diff_url)
+print(github.event)
 
 
 # using an access token
