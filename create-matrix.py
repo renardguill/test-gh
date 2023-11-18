@@ -1,5 +1,6 @@
 import os
 import json
+from types import SimpleNamespace
 
 clusters_matrix = {
     "include": [ 
@@ -16,7 +17,7 @@ with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
 
 
 # convert json string from env variable GITHUB_CONTEXT to object
-github = json.loads(os.environ.get('GITHUB_CONTEXT'))
+github = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
 print("diff_url:")
 print(github)
 print(github.diff_url)
