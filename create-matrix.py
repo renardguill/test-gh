@@ -18,7 +18,6 @@ with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
 # convert json string from env variable GITHUB_CONTEXT to object
 github = json.loads(os.environ.get('GITHUB_CONTEXT'))
 print("diff_url:")
-print(github['diff_url'])
 print(github)
 print(github.diff_url)
 
