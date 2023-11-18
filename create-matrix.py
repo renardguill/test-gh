@@ -19,6 +19,8 @@ with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
 github = json.loads(os.environ.get('GITHUB_CONTEXT'))
 print("diff_url:")
 print(github['diff_url'])
+print(github)
+print(github.diff_url)
 
 print("GITHUB_ENV:")
 # print content of file in env variable GITHUB_ENV
