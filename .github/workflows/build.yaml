@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJson(needs.matrix-cake.outputs.clusters-matrix)}}
-      max-parallel: ${{ needs.matrix-cake.outputs.max-parallel }}
+      max-parallel: ${{ fromJson(needs.matrix-cake.outputs.max-parallel) }}
     environment: 
       name: ${{ matrix.ClusterName }}
       url: https://${{ matrix.ClusterName }}.luccakube.tech
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJson(needs.matrix-python.outputs.clusters-matrix)}}
-      max-parallel: ${{ needs.matrix-python.outputs.max-parallel }}
+      max-parallel: ${{ fromJson(needs.matrix-python.outputs.max-parallel) }}
     environment: 
       name: ${{ matrix.ClusterName }}
       url: https://${{ matrix.ClusterName }}.luccakube.tech
