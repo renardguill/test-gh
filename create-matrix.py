@@ -18,17 +18,6 @@ clusters_matrix = {
 #     f.write("max-parallel=3" + "\n")
 #     f.write("clusters-matrix=" + clustersMatrixString)
 
-
-# get string content of file context.json
-with open("context.json") as f:
-    context = f.read()
-
-# convert json string from file context.json to object
-context = json.loads(context, object_hook=lambda d: SimpleNamespace(**d))
-print("context:")
-print(context)
-
-
 # convert json string from env variable GITHUB_CONTEXT to object
 github = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
 print("diff_url:")
@@ -44,9 +33,3 @@ pr = repo.get_pull(github.event.number)
 print("pr files:")
 for file in pr.get_files():
     print(file.filename)
-
-
-print("GITHUB_ENV:")
-# print content of file in env variable GITHUB_ENV
-with open(os.environ.get('GITHUB_ENV')) as f:
-    print(f.read())
