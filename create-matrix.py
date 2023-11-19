@@ -11,6 +11,7 @@ github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda
 clusters_matrix = {}
 # GetEnvironmentString("GITHUB_EVENT_NAME") == "pull_request"
 if github_context.event_name == "pull_request":
+    print("pull request")
     # using an access token
     auth = Auth.Token(github_context.token)
     # Public Web Github
@@ -20,9 +21,15 @@ if github_context.event_name == "pull_request":
     print("pr files:")
     for file in pr.get_files():
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
-            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", ""), "ManifestPath": file.filename}]
             print(file)
-
+            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", ""), "ManifestPath": file.filename}]
+else:
+    print("not a pull request")
+    for filename in os.listdir('clusters'):
+        if filename.endswith(".yaml"):
+            print(filename)
+            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": filename.replace(".yaml", ""), "ManifestPath": "clusters/" + filename}]
+    print(github_context)
 
 clustersMatrixString = json.dumps(clusters_matrix).strip().replace(" ", "")
 with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
