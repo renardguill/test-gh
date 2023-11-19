@@ -24,8 +24,8 @@ if github_context.event_name == "pull_request":
     for file in pr.get_files():
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
             file_name = file.filename
-            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id + "-1", "ManifestPath": file_name + "in base ref: " + github_context.event.base_ref}]
-            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id + "-2", "ManifestPath": file_name + "in head ref: " + github_context.event.head_ref}]
+            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id + "-1", "ManifestPath": file_name + "in base ref: " + github_context.base_ref}]
+            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id + "-2", "ManifestPath": file_name + "in head ref: " + github_context.head_ref}]
             print(file)
 else:
     # print("not a pull request")
