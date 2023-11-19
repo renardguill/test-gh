@@ -6,10 +6,6 @@ from github import Github
 from github import Auth
 from git import Repo
 
-git_repo = Repo(".")
-commit = git_repo.commit("main")
-for item in git_repo.index.diff(None):
-    print(item.a_path)
 # convert json string from env variable GITHUB_CONTEXT to object
 github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
 
