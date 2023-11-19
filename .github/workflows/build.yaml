@@ -1,46 +1,53 @@
 name: GitHub Actions Test
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+      - "*"
+  push:
+    tags:
+      - "*"
 jobs:
   ###########################################
   #               With Cake                 #
   ###########################################
-  matrix-cake:
-    runs-on: ubuntu-latest
-    outputs:
-      clusters-matrix: ${{ steps.set-matrix.outputs.clusters-matrix }}
-    steps:
-    - name: Check out repository code
-      uses: actions/checkout@v4
-    - name: Run the Cake script
-      id: set-matrix
-      uses: cake-build/cake-action@v1
-      with:
-        script-path: create-matrix.cake
-  cluster-actions-from-cake:
-    name: job - ${{ matrix.ClusterName }}
-    needs: matrix-cake
-    runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{fromJson(needs.matrix-cake.outputs.clusters-matrix)}}
-      max-parallel: ${{ needs.matrix-cake.outputs.max-parallel }}
-    environment: 
-      name: ${{ matrix.ClusterName }}
-      url: https://${{ matrix.ClusterName }}.luccakube.tech
-    steps:
-    - name: step - ${{ matrix.ClusterName }}
-      run: echo ${{ matrix.ClusterName }} -> ${{ matrix.ManifestPath }} $OS_AUTH_URL $OS_IDENTITY_API_VERSION $OS_DOMAIN_NAME $OS_TENANT_ID $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_REGION_NAME $OVH_API_CREDS
-      env:
-        TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
-        OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
-        OS_IDENTITY_API_VERSION: ${{ vars.OS_IDENTITY_API_VERSION }}
-        OS_DOMAIN_NAME: ${{ vars.OS_DOMAIN_NAME }}
-        OS_TENANT_ID: ${{ secrets.OS_TENANT_ID }}
-        OS_TENANT_NAME: ${{ secrets.OS_TENANT_NAME }}
-        OS_USERNAME: ${{ secrets.OS_USERNAME }}
-        OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
-        OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
-        OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
+  # matrix-cake:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     clusters-matrix: ${{ steps.set-matrix.outputs.clusters-matrix }}
+  #     max-parallel: ${{ steps.set-matrix.outputs.max-parallel }}
+  #   steps:
+  #   - name: Check out repository code
+  #     uses: actions/checkout@v4
+  #   - name: Run the Cake script
+  #     id: set-matrix
+  #     uses: cake-build/cake-action@v1
+  #     with:
+  #       script-path: create-matrix.cake
+  # cluster-actions-from-cake:
+  #   name: job - ${{ matrix.ClusterName }}
+  #   needs: matrix-cake
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix: ${{fromJson(needs.matrix-cake.outputs.clusters-matrix)}}
+  #     max-parallel: ${{ fromJson(needs.matrix-cake.outputs.max-parallel) }}
+  #   environment: 
+  #     name: ${{ matrix.ClusterName }}
+  #     url: https://${{ matrix.ClusterName }}.luccakube.tech
+  #   steps:
+  #   - name: step - ${{ matrix.ClusterName }}
+  #     run: echo ${{ matrix.ClusterName }} -> ${{ matrix.ManifestPath }} $OS_AUTH_URL $OS_IDENTITY_API_VERSION $OS_DOMAIN_NAME $OS_TENANT_ID $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_REGION_NAME $OVH_API_CREDS
+  #     env:
+  #       TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
+  #       OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
+  #       OS_IDENTITY_API_VERSION: ${{ vars.OS_IDENTITY_API_VERSION }}
+  #       OS_DOMAIN_NAME: ${{ vars.OS_DOMAIN_NAME }}
+  #       OS_TENANT_ID: ${{ secrets.OS_TENANT_ID }}
+  #       OS_TENANT_NAME: ${{ secrets.OS_TENANT_NAME }}
+  #       OS_USERNAME: ${{ secrets.OS_USERNAME }}
+  #       OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
+  #       OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
+  #       OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   ###########################################
   #              With Python                #
   ###########################################
@@ -48,24 +55,35 @@ jobs:
       runs-on: ubuntu-latest
       outputs:
         clusters-matrix: ${{ steps.set-matrix.outputs.clusters-matrix }}
+        max-parallel: ${{ steps.set-matrix.outputs.max-parallel }}
       steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
       - id: set-matrix
         run: python3 create-matrix.py
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
   cluster-actions-from-python:
     name: job - ${{ matrix.ClusterName }}
     needs: matrix-python
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJson(needs.matrix-python.outputs.clusters-matrix)}}
-      max-parallel: 3
+      max-parallel: ${{ fromJson(needs.matrix-python.outputs.max-parallel) }}
     environment: 
       name: ${{ matrix.ClusterName }}
       url: https://${{ matrix.ClusterName }}.luccakube.tech
     steps:
     - name: step - ${{ matrix.ClusterName }}
-      run: echo ${{ matrix.ClusterName }} -> ${{ matrix.ManifestPath }} $OS_AUTH_URL $OS_IDENTITY_API_VERSION $OS_DOMAIN_NAME $OS_TENANT_ID $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_REGION_NAME $OVH_API_CREDS
+      run: echo ${{ matrix.ClusterName }} - ${{ matrix.ManifestPath }} $OS_AUTH_URL $OS_IDENTITY_API_VERSION $OS_DOMAIN_NAME $OS_TENANT_ID $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_REGION_NAME $OVH_API_CREDS
       env:
         TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
         OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
