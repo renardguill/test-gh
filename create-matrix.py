@@ -1,10 +1,8 @@
 import os
 import json
-import glob
 from types import SimpleNamespace
 from github import Github
 from github import Auth
-from git import Repo
 
 # convert json string from env variable GITHUB_CONTEXT to object
 github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
@@ -12,41 +10,34 @@ github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda
 
 clusters_matrix = {}
 max_parallel = 3
-# GetEnvironmentString("GITHUB_EVENT_NAME") == "pull_request"
+
+# using an access token
+auth = Auth.Token(github_context.token)
+# Public Web Github
+github_api = Github(auth=auth)
+github_repo = github_api.get_repo(github_context.repository)
+
+
 if github_context.event_name == "pull_request":
     print("pull request")
     max_parallel = 1
-    # using an access token
-    auth = Auth.Token(github_context.token)
-    # Public Web Github
-    github_api = Github(auth=auth)
-    github_repo = github_api.get_repo(github_context.repository)
     pr = github_repo.get_pull(github_context.event.number)
     print("pr files:")
     for file in pr.get_files():
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
-            file_name = file.filename
-            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": file_name + " in base ref: " + github_context.base_ref, "ChangeType": "Create"}]
-            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": file_name + " in head ref: " + github_context.head_ref, "ChangeType": "Update"}]
             print(file.status + " " + file.filename)
-    print("commit files:")
-    commit = github_repo.get_commit(sha=github_context.sha)
-    for file in commit.files:
-        if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
-            file_name = file.filename
-            print(file.status + " " + file.filename)
+            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": file.filename + " in base ref: " + github_context.base_ref, "ChangeType": "Create"}]
+            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": file.filename + " in head ref: " + github_context.head_ref, "ChangeType": "Update"}]
 else:
     print("On tag")
-    # for file_name in glob.glob("clusters/**/*.yaml", recursive=True):
-    #     print(file_name)
-    #     clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", ""), "ManifestPath": file_name}]
-    git_repo = Repo(github_context.workspace)
-    commit = git_repo.commit(github_context.ref_name)
+    commit = github_repo.get_commit(sha=github_context.sha)
+    print("commit files:")
     for file in commit.files:
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
-            file_name = file.filename
-            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", ""), "ManifestPath": file_name, "ChangeType": "CreateOrUpdate"}]
+            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", ""), "ManifestPath": file.filename, "ChangeType": "CreateOrUpdate"}]
             print(file.status + " " + file.filename)
+
+# Set Github Output
 clustersMatrixString = json.dumps(clusters_matrix).strip().replace(" ", "")
 with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
     f.write("max-parallel=" + str(max_parallel) + "\n")
