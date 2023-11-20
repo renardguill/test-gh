@@ -33,7 +33,7 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
   create-cluster:
-    name: _${{ matrix.ClusterName }}
+    name: ${{ matrix.ChangeType }} - ${{ matrix.ClusterName }}
     needs: create-matrix
     if:  ${{ needs.create-matrix.outputs.create-clusters-matrix != '' }}
     runs-on: ubuntu-latest
