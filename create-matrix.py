@@ -36,7 +36,7 @@ if github_context.event_name == "pull_request":
             file_name = file.filename
             print(file.status + " " + file.filename)
 else:
-    # print("not a pull request")
+    print("On tag")
     # for file_name in glob.glob("clusters/**/*.yaml", recursive=True):
     #     print(file_name)
     #     clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", ""), "ManifestPath": file_name}]
