@@ -8,9 +8,10 @@ from github import Auth
 github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
 
 
-clusters_matrix = {}
-ephemeral_clusters_matrix = {}
+create_or_update_clusters_matrix = {}
+create_clusters_matrix = {}
 max_parallel = 6
+is_ephemeral = True
 
 # using an access token
 auth = Auth.Token(github_context.token)
@@ -31,28 +32,31 @@ if github_context.event_name == "pull_request":
                 previous_contents = pr.base.repo.get_contents(file.filename, ref=github_context.base_ref)
                 previous_download_url = previous_contents.download_url
                 print(previous_download_url)
-                ephemeral_clusters_matrix['include'] = ephemeral_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": previous_download_url, "ChangeType": "Create"}]
+                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": previous_download_url, "ChangeType": "Create"}]
 
             print("new_contents:")
             new_contents = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
             new_download_url = new_contents.download_url
             print(new_download_url)
-            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": new_download_url, "ChangeType": "CreateOrUpdate"}]
+            create_or_update_clusters_matrix['include'] = create_or_update_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": new_download_url, "ChangeType": "CreateOrUpdate"}]
 else:
     print("On tag")
+    is_ephemeral = False
     commit = github_repo.get_commit(sha=github_context.sha)
     print("commit files:")
     for file in commit.files:
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
-            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", ""), "ManifestPath": file.filename, "ChangeType": "CreateOrUpdate"}]
+            create_or_update_clusters_matrix['include'] = create_or_update_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", ""), "ManifestPath": file.filename, "ChangeType": "CreateOrUpdate"}]
             print(file.status + " " + file.filename)
 
 # Set Github Output
-clustersMatrixString = json.dumps(clusters_matrix).strip().replace(" ", "")
-ephemeralClustersMatrixString = json.dumps(ephemeral_clusters_matrix).strip().replace(" ", "")
+clustersMatrixString = json.dumps(create_or_update_clusters_matrix).strip().replace(" ", "")
+ephemeralClustersMatrixString = json.dumps(create_clusters_matrix).strip().replace(" ", "")
 with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
     f.write("max-parallel=" + str(max_parallel))
     f.write("\n")
-    f.write("clusters-matrix=" + clustersMatrixString)
+    f.write("create-clusters-matrix=" + ephemeralClustersMatrixString)
     f.write("\n")
-    f.write("ephemeral-clusters-matrix=" + ephemeralClustersMatrixString)
+    f.write("create-or-update-clusters-matrix=" + clustersMatrixString)
+    f.write("\n")
+    f.write("is-ephemeral=" + str(is_ephemeral))

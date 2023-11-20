@@ -11,9 +11,11 @@ jobs:
   create-matrix:
       runs-on: ubuntu-latest
       outputs:
-        ephemeral-clusters-matrix: ${{ steps.set-matrix.outputs.ephemeral-clusters-matrix }}
-        clusters-matrix: ${{ steps.set-matrix.outputs.clusters-matrix }}
+        create-clusters-matrix: ${{ steps.set-matrix.outputs.create-clusters-matrix }}
+        create-or-update-clusters-matrix: ${{ steps.set-matrix.outputs.create-or-update-clusters-matrix }}
+        is-ephemeral: ${{ fromJson(steps.set-matrix.outputs.is-ephemeral) }}
         max-parallel: ${{ steps.set-matrix.outputs.max-parallel }}
+      # permissions: TODO
       steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,13 +32,13 @@ jobs:
         run: python3 create-matrix.py
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
-  create-ephemeral-cluster:
+  create-cluster:
     name: _${{ matrix.ClusterName }}
     needs: create-matrix
-    if:  ${{ needs.create-matrix.outputs.clusters-matrix != '' }}
+    if:  ${{ needs.create-matrix.outputs.create-clusters-matrix != '' }}
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ fromJson(needs.create-matrix.outputs.ephemeral-clusters-matrix) }}
+      matrix: ${{ fromJson(needs.create-matrix.outputs.create-clusters-matrix) }}
       max-parallel: ${{ fromJson(needs.create-matrix.outputs.max-parallel) }}
     environment: 
       name: ${{ matrix.ClusterName }}
@@ -57,11 +59,11 @@ jobs:
         OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   create-or-update-cluster:
     name: ${{ matrix.ClusterName }}
-    needs: ["create-matrix", "create-ephemeral-cluster"]
-    if: ${{ needs.create-matrix.outputs.clusters-matrix != '' }}
+    needs: ["create-matrix", "create-cluster"]
+    if: ${{ needs.create-matrix.outputs.create-or-update-clusters-matrix != '' }}
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ fromJson(needs.create-matrix.outputs.clusters-matrix) }}
+      matrix: ${{ fromJson(needs.create-matrix.outputs.create-or-update-clusters-matrix) }}
       max-parallel: ${{ fromJson(needs.create-matrix.outputs.max-parallel) }}
     environment: 
       name: ${{ matrix.ClusterName }}
@@ -82,9 +84,9 @@ jobs:
         OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   cleanup-ephemaral-clusters:
     name: Cleanup ephemeral environments
-    needs: ["create-or-update-cluster", "create-matrix", "create-ephemeral-cluster"]
-    if: ${{ needs.create-matrix.outputs.ephemeral-clusters-matrix != '' }}
+    needs: ["create-or-update-cluster", "create-matrix", "create-cluster"]
+    if: ${{ needs.create-matrix.outputs.create-clusters-matrix != '' && needs.create-matrix.outputs.is-ephemeral }}
     runs-on: ubuntu-latest
     steps:
     - name: Cleanup ephemeral environments
-      run: echo "Cleanup ephemeral environments ${{ toJson(needs.create-matrix.outputs.ephemeral-clusters-matrix) }}"
+      run: echo "Cleanup ephemeral environments ${{ toJson(needs.create-matrix.outputs.create-clusters-matrix) }}"
