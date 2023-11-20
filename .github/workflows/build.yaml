@@ -11,7 +11,7 @@ jobs:
   create-matrix:
       runs-on: ubuntu-latest
       outputs:
-        ephemeral-clusters-matrix: ${{ steps.set-matrix.outputs.ephemeral-clusters-matrix }}
+        ephemeral-clusters-matrix: ${{ steps.set-matrix.outputs.ephemeral-clusters-matrix2 }}
         clusters-matrix: ${{ steps.set-matrix.outputs.clusters-matrix }}
         max-parallel: ${{ steps.set-matrix.outputs.max-parallel }}
       steps:
@@ -80,7 +80,7 @@ jobs:
         OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   cleanup-ephemaral-environments:
     name: Cleanup ephemeral environments
-    needs: ["create-or-update-cluster", "create-matrix"]
+    needs: ["create-or-update-cluster", "create-matrix", "create-ephemeral-cluster"]
     runs-on: ubuntu-latest
     steps:
     - name: Cleanup ephemeral environments
