@@ -1,7 +1,7 @@
 name: cluster-1
 provider: OVH
 endpoint: "https://foo.lucca.tech:443"
-secretStore: "s3://toto"
+secretStore: "s3://totos"
 talosVersion: "v1.6"
 kubeVersion: "v1.28"
 contolPlaneNodes:
