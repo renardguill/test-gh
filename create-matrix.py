@@ -25,6 +25,10 @@ if github_context.event_name == "pull_request":
     print("pr files:")
     for file in pr.get_files():
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
+            print(file.blob_url)
+            print(file.raw_data)
+            print(file.contents_url)
+            print(file.raw_url)
             print(file)
             clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": file.filename + " in base ref: " + github_context.base_ref, "ChangeType": "Create"}]
             clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": file.filename + " in head ref: " + github_context.head_ref, "ChangeType": "Update"}]
