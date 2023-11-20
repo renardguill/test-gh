@@ -21,7 +21,7 @@ if github_context.event_name == "pull_request":
     # Public Web Github
     github_api = Github(auth=auth)
     github_repo = github_api.get_repo(github_context.repository)
-    pr = github_repo.get_pull(1)
+    pr = github_repo.get_pull(github_context.event.number)
     print("pr files:")
     for file in pr.get_files():
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
