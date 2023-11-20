@@ -10,7 +10,7 @@ github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda
 
 clusters_matrix = {}
 ephemeral_clusters_matrix = {}
-max_parallel = 3
+max_parallel = 6
 
 # using an access token
 auth = Auth.Token(github_context.token)
@@ -21,7 +21,7 @@ github_repo = github_api.get_repo(github_context.repository)
 
 if github_context.event_name == "pull_request":
     print("pull request")
-    max_parallel = 1
+    max_parallel = 5
     pr = github_repo.get_pull(github_context.event.number)
     print("pr files:")
     for file in pr.get_files():
@@ -37,7 +37,7 @@ if github_context.event_name == "pull_request":
             new_contents = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
             new_download_url = new_contents.download_url
             print(new_download_url)
-            ephemeral_clusters_matrix['include'] = ephemeral_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": new_download_url, "ChangeType": "CreateOrUpdate"}]
+            clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": new_download_url, "ChangeType": "CreateOrUpdate"}]
 else:
     print("On tag")
     commit = github_repo.get_commit(sha=github_context.sha)

@@ -30,30 +30,6 @@ jobs:
         run: python3 create-matrix.py
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
-  create-or-update-cluster:
-    name: ${{ matrix.ClusterName }}
-    needs: create-matrix
-    runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{ fromJson(needs.create-matrix.outputs.clusters-matrix) }}
-      max-parallel: ${{ fromJson(needs.create-matrix.outputs.max-parallel) }}
-    environment: 
-      name: ${{ matrix.ClusterName }}
-      url: https://${{ matrix.ClusterName }}.luccakube.tech
-    steps:
-    - name: ${{ matrix.ChangeType }} ${{ matrix.ClusterName }}
-      run: echo ${{ matrix.ClusterName }} - ${{ matrix.ManifestPath }} && env | grep OS_ && env | grep OVH_
-      env:
-        TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
-        OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
-        OS_IDENTITY_API_VERSION: ${{ vars.OS_IDENTITY_API_VERSION }}
-        OS_DOMAIN_NAME: ${{ vars.OS_DOMAIN_NAME }}
-        OS_TENANT_ID: ${{ secrets.OS_TENANT_ID }}
-        OS_TENANT_NAME: ${{ secrets.OS_TENANT_NAME }}
-        OS_USERNAME: ${{ secrets.OS_USERNAME }}
-        OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
-        OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
-        OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   create-ephemeral-cluster:
     name: ${{ matrix.ClusterName }}
     needs: create-matrix
@@ -78,9 +54,33 @@ jobs:
         OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
         OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
         OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
+  create-or-update-cluster:
+    name: ${{ matrix.ClusterName }}
+    needs: create-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.create-matrix.outputs.clusters-matrix) }}
+      max-parallel: ${{ fromJson(needs.create-matrix.outputs.max-parallel) }}
+    environment: 
+      name: ${{ matrix.ClusterName }}
+      url: https://${{ matrix.ClusterName }}.luccakube.tech
+    steps:
+    - name: ${{ matrix.ChangeType }} ${{ matrix.ClusterName }}
+      run: echo ${{ matrix.ClusterName }} - ${{ matrix.ManifestPath }} && env | grep OS_ && env | grep OVH_
+      env:
+        TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
+        OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
+        OS_IDENTITY_API_VERSION: ${{ vars.OS_IDENTITY_API_VERSION }}
+        OS_DOMAIN_NAME: ${{ vars.OS_DOMAIN_NAME }}
+        OS_TENANT_ID: ${{ secrets.OS_TENANT_ID }}
+        OS_TENANT_NAME: ${{ secrets.OS_TENANT_NAME }}
+        OS_USERNAME: ${{ secrets.OS_USERNAME }}
+        OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
+        OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
+        OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   cleanup-ephemaral-environments:
     name: Cleanup ephemeral environments
-    needs: ["create-ephemeral-cluster", "create-matrix"]
+    needs: ["create-or-update-cluster", "create-matrix"]
     runs-on: ubuntu-latest
     steps:
     - name: Cleanup ephemeral environments
