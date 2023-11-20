@@ -11,7 +11,7 @@ jobs:
   create-matrix:
       runs-on: ubuntu-latest
       outputs:
-        ephemeral-clusters-matrix: ${{ steps.set-matrix.outputs.ephemeral-clusters-matrix2 }}
+        ephemeral-clusters-matrix: ${{ steps.set-matrix.outputs.ephemeral-clusters-matrix }}
         clusters-matrix: ${{ steps.set-matrix.outputs.clusters-matrix }}
         max-parallel: ${{ steps.set-matrix.outputs.max-parallel }}
       steps:
@@ -33,7 +33,7 @@ jobs:
   create-ephemeral-cluster:
     name: _${{ matrix.ClusterName }}
     needs: create-matrix
-    if: ${{ needs.create-matrix.result == 'success' }}
+    if:  ${{ needs.create-matrix.outputs.clusters-matrix != '' }}
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.create-matrix.outputs.ephemeral-clusters-matrix) }}
@@ -58,7 +58,7 @@ jobs:
   create-or-update-cluster:
     name: ${{ matrix.ClusterName }}
     needs: ["create-matrix", "create-ephemeral-cluster"]
-    if: ${{ needs.create-matrix.outputs.clusters-matrix }}
+    if: ${{ needs.create-matrix.outputs.clusters-matrix != '' }}
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.create-matrix.outputs.clusters-matrix) }}
@@ -83,7 +83,7 @@ jobs:
   cleanup-ephemaral-clusters:
     name: Cleanup ephemeral environments
     needs: ["create-or-update-cluster", "create-matrix", "create-ephemeral-cluster"]
-    if: ${{ needs.create-matrix.outputs.ephemeral-clusters-matrix }}
+    if: ${{ needs.create-matrix.outputs.ephemeral-clusters-matrix != '' }}
     runs-on: ubuntu-latest
     steps:
     - name: Cleanup ephemeral environments
