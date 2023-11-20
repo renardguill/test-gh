@@ -32,7 +32,7 @@ if github_context.event_name == "pull_request":
                 previous_contents = pr.base.repo.get_contents(file.filename, ref=github_context.base_ref)
                 previous_download_url = previous_contents.download_url
                 print(previous_download_url)
-                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": previous_download_url, "ChangeType": "Create"}]
+                create_or_update_clusters_matrix['include'] = create_or_update_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": previous_download_url, "ChangeType": "Create"}]
 
             print("new_contents:")
             new_contents = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
