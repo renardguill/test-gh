@@ -8,8 +8,8 @@ from github import Auth
 github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
 
 
-create_or_update_clusters_matrix = {}
-create_clusters_matrix = {}
+create_or_update_clusters_matrix = { "include": []}
+create_clusters_matrix = { "include": []}
 max_parallel = 6
 is_ephemeral = True
 
