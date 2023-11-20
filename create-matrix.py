@@ -27,14 +27,16 @@ if github_context.event_name == "pull_request":
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
             if file.status != "added":
                 print("previous_contents:")
-                previous_contents = github_repo.get_contents(file.filename, ref=file.sha)
-                previous_download_url = previous_contents.download_url
+                previous_contents = pr.base.repo.get_contents(file.filename, ref=github_context.base_ref)
+                print(previous_contents)
+                previous_download_url = previous_contents.url
                 print(previous_download_url)
                 create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": previous_download_url, "ChangeType": "Create"}]
 
             print("new_contents:")
-            new_contents = github_repo.get_contents(file.filename, ref=file.sha)
-            new_download_url = new_contents.download_url
+            new_contents = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
+            print(new_contents)
+            new_download_url = new_contents.url
             print(new_download_url)
             create_or_update_clusters_matrix['include'] = create_or_update_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": new_download_url, "ChangeType": "CreateOrUpdate"}]
 else:
