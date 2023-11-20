@@ -25,6 +25,7 @@ if github_context.event_name == "pull_request":
     print("pr files:")
     for file in pr.get_files():
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
+            print(file.status)
             if file.status == "added":
                 print("added cluster files:")
                 print(file.filename)
