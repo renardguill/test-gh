@@ -83,5 +83,9 @@ with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
     f.write("update-clusters-matrix=" + updateClustersMatrixString)
     f.write("\n")
     f.write("is-ephemeral=" + str(is_ephemeral).lower())
+    f.write("\n")
+    f.write("need-create-clusters=" + str(len(create_clusters_matrix['include']) > 0).lower())
+    f.write("\n")
+    f.write("need-update-clusters=" + str(len(update_clusters_matrix['include']) > 0).lower())
 
 print(json.dumps(update_clusters_matrix, indent=4))

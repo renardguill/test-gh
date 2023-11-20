@@ -12,7 +12,9 @@ jobs:
       runs-on: ubuntu-latest
       outputs:
         create-clusters-matrix: ${{ steps.set-matrix.outputs.create-clusters-matrix }}
+        need-create-clusters: ${{ fromJson(steps.set-matrix.outputs.need-create-clusters) }}
         update-clusters-matrix: ${{ steps.set-matrix.outputs.update-clusters-matrix }}
+        need-update-clusters: ${{ fromJson(steps.set-matrix.outputs.need-update-clusters) }}
         is-ephemeral: ${{ fromJson(steps.set-matrix.outputs.is-ephemeral) }}
         max-parallel: ${{ steps.set-matrix.outputs.max-parallel }}
       # permissions: TODO
@@ -35,7 +37,8 @@ jobs:
   create-cluster:
     name: ${{ matrix.ClusterName }}
     needs: create-matrix
-    if:  ${{ needs.create-matrix.outputs.create-clusters-matrix != '' }}
+    # TODO check matrix instead of boolean value
+    if:  ${{ fromJson(needs.create-matrix.outputs.need-create-clusters) }}
     runs-on: ubuntu-latest
     concurrency: ${{ matrix.ClusterName }}
     strategy:
@@ -69,7 +72,8 @@ jobs:
   update-cluster:
     name: ${{ matrix.ClusterName }}
     needs: ["create-matrix", "create-cluster"]
-    if: ${{ needs.create-matrix.outputs.update-clusters-matrix != '' }}
+    # TODO check matrix instead of boolean value
+    if: ${{ fromJson(needs.create-matrix.outputs.need-update-clusters) }}
     runs-on: ubuntu-latest
     concurrency: ${{ matrix.ClusterName }}
     strategy:
