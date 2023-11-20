@@ -58,7 +58,7 @@ jobs:
   #       OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
   #       OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   create-or-update-cluster:
-    name: ${{ matrix.ClusterName }}
+    name: ${{ matrix.ChangeType }} - ${{ matrix.ClusterName }}
     needs: ["create-matrix"]
     if: ${{ needs.create-matrix.outputs.create-or-update-clusters-matrix != '' }}
     runs-on: ubuntu-latest
