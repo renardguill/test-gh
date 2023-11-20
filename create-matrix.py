@@ -59,4 +59,4 @@ with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
     f.write("\n")
     f.write("create-or-update-clusters-matrix=" + clustersMatrixString)
     f.write("\n")
-    f.write("is-ephemeral=" + str(is_ephemeral))
+    f.write("is-ephemeral=" + str(is_ephemeral).lower())

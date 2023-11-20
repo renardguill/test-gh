@@ -62,6 +62,7 @@ jobs:
     needs: ["create-matrix", "create-cluster"]
     if: ${{ needs.create-matrix.outputs.create-or-update-clusters-matrix != '' }}
     runs-on: ubuntu-latest
+    concurrency: ${{ matrix.ClusterName }}
     strategy:
       matrix: ${{ fromJson(needs.create-matrix.outputs.create-or-update-clusters-matrix) }}
       max-parallel: ${{ fromJson(needs.create-matrix.outputs.max-parallel) }}
