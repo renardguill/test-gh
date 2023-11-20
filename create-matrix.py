@@ -1,3 +1,4 @@
+import base64
 import os
 import json
 from types import SimpleNamespace
@@ -25,12 +26,17 @@ if github_context.event_name == "pull_request":
     print("pr files:")
     for file in pr.get_files():
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
+            if file.status != "added":
+                print("previous_contents:")
+                previous_contents = pr.base.repo.get_contents(file.filename, ref=github_context.base_ref)
+                previous_decoded_content = base64.b64decode(previous_contents.content) 
+                print(previous_decoded_content)
 
-            print("contents_url: " + file.contents_url)
-            print("contents:")
-            print(pr.head.repo.get_contents(file.filename, ref=github_context.head_ref))
-            print("previous_contents:")
-            print(pr.base.repo.get_contents(file.filename, ref=github_context.base_ref))
+            print("new_contents:")
+            new_contents = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
+            new_decoded_content = base64.b64decode(new_contents.content)
+            print(new_decoded_content)
+
             clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": file.filename + " in base ref: " + github_context.base_ref, "ChangeType": "Create"}]
             clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id, "ManifestPath": file.filename + " in head ref: " + github_context.head_ref, "ChangeType": "Update"}]
 else:
