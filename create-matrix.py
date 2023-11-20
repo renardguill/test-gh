@@ -11,9 +11,11 @@ github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda
 
 
 clusters_matrix = {}
+max_parallel = 3
 # GetEnvironmentString("GITHUB_EVENT_NAME") == "pull_request"
 if github_context.event_name == "pull_request":
     print("pull request")
+    max_parallel = 1
     # using an access token
     auth = Auth.Token(github_context.token)
     # Public Web Github
@@ -27,6 +29,14 @@ if github_context.event_name == "pull_request":
             clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id + "-1", "ManifestPath": file_name + "in base ref: " + github_context.base_ref}]
             clusters_matrix['include'] = clusters_matrix.get('include', []) + [{"ClusterName": file_name.replace("clusters/", "").replace("/", "-").replace(".yaml", "-") + github_context.run_id + "-2", "ManifestPath": file_name + "in head ref: " + github_context.head_ref}]
             print(file)
+    print("commit files:")
+    git_repo = Repo(github_context.workspace)
+    commit = git_repo.commit(github_context.ref_name)
+    for item in git_repo.index.diff(None):
+        print(item)
+        if item.a_path.startswith("clusters/") and item.a_path.endswith(".yaml"):
+            file_name = item.a_path
+            print(file_name)
 else:
     # print("not a pull request")
     # for file_name in glob.glob("clusters/**/*.yaml", recursive=True):
@@ -43,5 +53,5 @@ else:
 
 clustersMatrixString = json.dumps(clusters_matrix).strip().replace(" ", "")
 with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
-    f.write("max-parallel=3" + "\n")
+    f.write("max-parallel=" + max_parallel + "\n")
     f.write("clusters-matrix=" + clustersMatrixString)
