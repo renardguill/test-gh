@@ -56,7 +56,7 @@ jobs:
         OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   create-or-update-cluster:
     name: ${{ matrix.ClusterName }}
-    needs: create-matrix
+    needs: ["create-matrix", "create-ephemeral-cluster"]
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJson(needs.create-matrix.outputs.clusters-matrix) }}
