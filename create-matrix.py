@@ -31,9 +31,8 @@ if github_context.event_name == "pull_request":
             print(file)
     print("commit files:")
     git_repo = Repo(github_context.workspace)
-    base_commit = git_repo.commit(github_context.base_ref)
-    head_commit = git_repo.commit(github_context.head_ref)
-    for item in base_commit.diff(head_commit):
+    base_commit = git_repo.commit("origin/" + github_context.base_ref)
+    for item in base_commit.diff(None):
         print(item)
         if item.a_path.startswith("clusters/") and item.a_path.endswith(".yaml"):
             file_name = item.a_path
