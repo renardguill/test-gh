@@ -37,7 +37,7 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
   create-cluster:
-    name: Create ${{ matrix.ClusterName }}
+    name: ${{ matrix.ClusterName }} (create)
     needs: create-matrix
     # TODO check matrix instead of boolean value
     if:  ${{ fromJson(needs.create-matrix.outputs.need-create-clusters) }}
@@ -70,7 +70,7 @@ jobs:
         OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
         OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   update-cluster:
-    name: Update ${{ matrix.ClusterName }}
+    name: ${{ matrix.ClusterName }} (update)
     needs: ["create-matrix", "create-cluster"]
     # TODO check matrix instead of boolean value
     if: ${{ fromJson(needs.create-matrix.outputs.need-update-clusters) }}

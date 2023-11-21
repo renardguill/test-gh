@@ -25,29 +25,29 @@ if github_context.event_name == "pull_request":
     print("pr files:")
     for file in pr.get_files():
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
-            print(file.status)
             if file.status == "added":
                 print("added cluster files:")
-                print(file.filename)
+                print("    " + file.filename)
+                cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id
                 content = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
                 download_url = content.download_url
-                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "_") + github_context.run_id, "ManifestUrl": download_url, "ChangeType": "Create"}]
+                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
             if file.status == "modified":
                 print("modified cluster files:")
-                print(file.filename)
-                print("Get previous_contents:")
+                print("    " + file.filename)
+                cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id
                 previous_content = pr.base.repo.get_contents(file.filename, ref=github_context.base_ref)
                 download_url = previous_content.download_url
-                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "_") + github_context.run_id, "ManifestUrl": download_url, "ChangeType": "Create"}]
+                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
                 content = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
                 download_url = content.download_url
-                update_clusters_matrix['include'] = update_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "_") + github_context.run_id, "ManifestUrl": download_url, "ChangeType": "Update"}]
+                update_clusters_matrix['include'] = update_clusters_matrix.get('include', []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Update"}]
             if file.status == "deleted":
                 print("deleted cluster files:")
-                print(file.filename)
+                print("    " + file.filename)
                 print("delete cluster is not allowed")
 elif github_context.event_name == "push":
-    print("On tag")
+    print("On tag pushe")
     is_ephemeral = False
     commit = github_repo.get_commit(sha=github_context.sha)
     print("commit files:")
@@ -58,15 +58,17 @@ elif github_context.event_name == "push":
                 download_url = content.download_url
             if file.status == "added":
                 print("added cluster files:")
-                print(file.filename)
-                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "_") + github_context.run_id, "ManifestUrl": download_url, "ChangeType": "Create"}]
+                print("    " + file.filename)
+                cluster_name = os.path.basename(file.filename).replace(".yaml", "")
+                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
             if file.status == "modified":
                 print("modified cluster files:")
-                print(file.filename)
-                update_clusters_matrix['include'] = update_clusters_matrix.get('include', []) + [{"ClusterName": file.filename.replace("clusters/", "").replace("/", "-").replace(".yaml", "_") + github_context.run_id, "ManifestUrl": download_url, "ChangeType": "Update"}]
+                print("    " + file.filename)
+                cluster_name = os.path.basename(file.filename).replace(".yaml", "")
+                update_clusters_matrix['include'] = update_clusters_matrix.get('include', []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Update"}]
             if file.status == "deleted":
                 print("deleted cluster files:")
-                print(file.filename)
+                print("    " + file.filename)
                 print("delete cluster is not allowed")
 else:
     print("Not supported event")
