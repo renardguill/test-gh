@@ -5,11 +5,11 @@ from github import Github
 from github import Auth
 
 # convert GITHUB_CONTEXT to object
-github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
+github_context = json.loads(os.environ.get("GITHUB_CONTEXT"), object_hook=lambda d: SimpleNamespace(**d))
 
 
-update_clusters_matrix = { "include": []}
-create_clusters_matrix = { "include": []}
+update_clusters_matrix = {"include": []}
+create_clusters_matrix = {"include": []}
 max_parallel = 6
 is_ephemeral = True
 
@@ -31,17 +31,17 @@ if github_context.event_name == "pull_request":
                 cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id
                 content = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
                 download_url = content.download_url
-                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
+                create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
             if file.status == "modified":
                 print("modified cluster files:")
                 print("    " + file.filename)
                 cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id
                 previous_content = pr.base.repo.get_contents(file.filename, ref=github_context.base_ref)
                 download_url = previous_content.download_url
-                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
+                create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
                 content = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
                 download_url = content.download_url
-                update_clusters_matrix['include'] = update_clusters_matrix.get('include', []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Update"}]
+                update_clusters_matrix["include"] = update_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Update"}]
             if file.status == "deleted":
                 print("deleted cluster files:")
                 print("    " + file.filename)
@@ -60,12 +60,12 @@ elif github_context.event_name == "push":
                 print("added cluster files:")
                 print("    " + file.filename)
                 cluster_name = os.path.basename(file.filename).replace(".yaml", "")
-                create_clusters_matrix['include'] = create_clusters_matrix.get('include', []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
+                create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
             if file.status == "modified":
                 print("modified cluster files:")
                 print("    " + file.filename)
                 cluster_name = os.path.basename(file.filename).replace(".yaml", "")
-                update_clusters_matrix['include'] = update_clusters_matrix.get('include', []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Update"}]
+                update_clusters_matrix["include"] = update_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Update"}]
             if file.status == "deleted":
                 print("deleted cluster files:")
                 print("    " + file.filename)
@@ -77,7 +77,7 @@ else:
 # Set Github Output
 createClustersMatrixString = json.dumps(create_clusters_matrix).strip().replace(" ", "")
 updateClustersMatrixString = json.dumps(update_clusters_matrix).strip().replace(" ", "")
-with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
+with open(os.environ.get("GITHUB_OUTPUT"), "a") as f:
     f.write("max-parallel=" + str(max_parallel))
     f.write("\n")
     f.write("create-clusters-matrix=" + createClustersMatrixString)
@@ -86,6 +86,6 @@ with open(os.environ.get('GITHUB_OUTPUT'), 'a') as f:
     f.write("\n")
     f.write("is-ephemeral=" + str(is_ephemeral).lower())
     f.write("\n")
-    f.write("need-create-clusters=" + str(len(create_clusters_matrix['include']) > 0).lower())
+    f.write("need-create-clusters=" + str(len(create_clusters_matrix["include"]) > 0).lower())
     f.write("\n")
-    f.write("need-update-clusters=" + str(len(update_clusters_matrix['include']) > 0).lower())
+    f.write("need-update-clusters=" + str(len(update_clusters_matrix["include"]) > 0).lower())
