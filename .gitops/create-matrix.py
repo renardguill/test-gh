@@ -28,14 +28,14 @@ if github_context.event_name == "pull_request":
             if file.status == "added":
                 print("added cluster files:")
                 print("    " + file.filename)
-                cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id
+                cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id + "_tmp"
                 content = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
                 download_url = content.download_url
                 create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
             if file.status == "modified":
                 print("modified cluster files:")
                 print("    " + file.filename)
-                cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id
+                cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id + "_tmp"
                 previous_content = pr.base.repo.get_contents(file.filename, ref=github_context.base_ref)
                 download_url = previous_content.download_url
                 create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
