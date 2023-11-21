@@ -52,14 +52,11 @@ jobs:
     steps:
     - name: ${{ matrix.ChangeType }} ${{ matrix.ClusterName }}
       run: |
-        env | grep OS_ && env | grep OVH_
-        curl -L \
+        curl -LS \
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${{ github.token }}" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
         ${{ matrix.ManifestUrl }} -o ${{ matrix.ClusterName }}.yaml
-        ls -lah
-        echo ${{ matrix.ChangeType }} ${{ matrix.ClusterName }} ${{ matrix.ManifestUrl }}
         cat ${{ matrix.ClusterName }}.yaml
       env:
         TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
@@ -88,14 +85,11 @@ jobs:
     steps:
     - name: ${{ matrix.ChangeType }} ${{ matrix.ClusterName }}
       run: |
-        env | grep OS_ && env | grep OVH_
-        curl -L \
+        curl -LS \
           -H "Accept: application/vnd.github+json" \
           -H "Authorization: Bearer ${{ github.token }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           ${{ matrix.ManifestUrl }} -o ${{ matrix.ClusterName }}.yaml
-        ls -lah
-        echo ${{ matrix.ChangeType }} ${{ matrix.ClusterName }} ${{ matrix.ManifestUrl }}
         cat ${{ matrix.ClusterName }}.yaml
       env:
         TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
