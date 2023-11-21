@@ -72,12 +72,12 @@ jobs:
     name: ${{ matrix.ClusterName }} (update)
     needs: ["pre-deploy", "create-cluster"]
     # TODO check matrix instead of boolean value
-    if: ${{ fromJson(needs.create-matrix.outputs.need-update-clusters) }}
+    if: ${{ fromJson(needs.pre-deploy.outputs.need-update-clusters) }}
     runs-on: ubuntu-latest
     concurrency: ${{ matrix.ClusterName }}
     strategy:
-      matrix: ${{ fromJson(needs.create-matrix.outputs.update-clusters-matrix) }}
-      max-parallel: ${{ fromJson(needs.create-matrix.outputs.max-parallel) }}
+      matrix: ${{ fromJson(needs.pre-deploy.outputs.update-clusters-matrix) }}
+      max-parallel: ${{ fromJson(needs.pre-deploy.outputs.max-parallel) }}
     environment: 
       name: ${{ matrix.ClusterName }}
       url: https://${{ matrix.ClusterName }}.luccakube.tech
