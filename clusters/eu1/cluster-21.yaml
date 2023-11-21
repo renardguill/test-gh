@@ -1,4 +1,4 @@
-name: cluster-21
+name: cluster-213
 provider: OVH
 endpoint: "https://foo.lucca.tech:443"
 secretStore: "s3://toto"

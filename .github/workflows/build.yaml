@@ -8,7 +8,8 @@ on:
     tags:
       - "*"
 jobs:
-  create-matrix:
+  pre-deploy:
+      name: Pre-deploy
       runs-on: ubuntu-latest
       outputs:
         create-clusters-matrix: ${{ steps.set-matrix.outputs.create-clusters-matrix }}
@@ -26,26 +27,24 @@ jobs:
         with:
           python-version: '3.x'
       - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r .gitops/requirements.txt
-      - name: TODO - Check file name according cluster name
-        run: echo 'python3 .gitops/check-filename.py'
+        run: pip install -r .gitops/requirements.txt
+      - name: Check files names according clusters names
+        run: python .gitops/ci-checks.py --check-files-names
       - id: set-matrix
-        name: Set matrix
+        name: Set clusters matrix
         run: python3 .gitops/create-matrix.py
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
   create-cluster:
     name: ${{ matrix.ClusterName }} (create)
-    needs: create-matrix
+    needs: pre-deploy
     # TODO check matrix instead of boolean value
-    if:  ${{ fromJson(needs.create-matrix.outputs.need-create-clusters) }}
+    if:  ${{ fromJson(needs.pre-deploy.outputs.need-create-clusters) }}
     runs-on: ubuntu-latest
     concurrency: ${{ matrix.ClusterName }}
     strategy:
-      matrix: ${{ fromJson(needs.create-matrix.outputs.create-clusters-matrix) }}
-      max-parallel: ${{ fromJson(needs.create-matrix.outputs.max-parallel) }}
+      matrix: ${{ fromJson(needs.pre-deploy.outputs.create-clusters-matrix) }}
+      max-parallel: ${{ fromJson(needs.pre-deploy.outputs.max-parallel) }}
     environment: 
       name: ${{ matrix.ClusterName }}
       url: https://${{ matrix.ClusterName }}.luccakube.tech
@@ -71,7 +70,7 @@ jobs:
         OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   update-cluster:
     name: ${{ matrix.ClusterName }} (update)
-    needs: ["create-matrix", "create-cluster"]
+    needs: ["pre-deploy", "create-cluster"]
     # TODO check matrix instead of boolean value
     if: ${{ fromJson(needs.create-matrix.outputs.need-update-clusters) }}
     runs-on: ubuntu-latest
@@ -104,9 +103,19 @@ jobs:
         OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   cleanup-ephemaral-clusters:
     name: Cleanup ephemeral environments
-    needs: ["create-matrix", "create-cluster", "update-cluster"]
-    if: ${{ needs.create-matrix.outputs.create-clusters-matrix != '' && needs.create-matrix.outputs.is-ephemeral }}
+    needs: ["pre-deploy", "create-cluster", "update-cluster"]
+    if: ${{ needs.pre-deploy.outputs.create-clusters-matrix != '' && needs.pre-deploy.outputs.is-ephemeral }}
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - name: Install Python dependencies
+      run: pip install -r .gitops/requirements.txt
     - name: Cleanup ephemeral environments
-      run: echo "Cleanup ephemeral environments ${{ toJson(needs.create-matrix.outputs.create-clusters-matrix) }}"
+      run: python .gitops/cleanup-environments.py
+      env:
+        CLUSTERS_MATRIX: ${{ toJson(needs.pre-deploy.outputs.create-clusters-matrix) }}
