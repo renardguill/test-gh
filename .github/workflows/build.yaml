@@ -8,35 +8,48 @@ on:
     tags:
       - "*"
 jobs:
+  ci-checks:
+    name: CI checks
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - name: Install Python dependencies
+      run: pip install -r .gitops/requirements.txt
+    - name: Check files names according clusters names
+      run: python .gitops/ci-checks.py --check-files-names
   pre-deploy:
-      name: Pre-deploy
-      runs-on: ubuntu-latest
-      outputs:
-        create-clusters-matrix: ${{ steps.set-matrix.outputs.create-clusters-matrix }}
-        need-create-clusters: ${{ fromJson(steps.set-matrix.outputs.need-create-clusters) }}
-        update-clusters-matrix: ${{ steps.set-matrix.outputs.update-clusters-matrix }}
-        need-update-clusters: ${{ fromJson(steps.set-matrix.outputs.need-update-clusters) }}
-        is-ephemeral: ${{ fromJson(steps.set-matrix.outputs.is-ephemeral) }}
-        max-parallel: ${{ steps.set-matrix.outputs.max-parallel }}
-      # permissions: TODO
-      steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-      - name: Install Python dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install -r .gitops/requirements.txt
-      - name: Check files names according clusters names
-        run: python3 .gitops/ci-checks.py --check-files-names
-      - id: set-matrix
-        name: Set clusters matrix
-        run: python3 .gitops/create-matrix.py
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
+    name: Pre-deploy
+    needs: ci-checks
+    runs-on: ubuntu-latest
+    outputs:
+      create-clusters-matrix: ${{ steps.set-matrix.outputs.create-clusters-matrix }}
+      need-create-clusters: ${{ fromJson(steps.set-matrix.outputs.need-create-clusters) }}
+      update-clusters-matrix: ${{ steps.set-matrix.outputs.update-clusters-matrix }}
+      need-update-clusters: ${{ fromJson(steps.set-matrix.outputs.need-update-clusters) }}
+      is-ephemeral: ${{ fromJson(steps.set-matrix.outputs.is-ephemeral) }}
+      max-parallel: ${{ steps.set-matrix.outputs.max-parallel }}
+    # permissions: TODO
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+    - name: Install Python dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip3 install -r .gitops/requirements.txt
+    - id: set-matrix
+      name: Set clusters matrix
+      run: python3 .gitops/create-matrix.py
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
   create-cluster:
     name: ${{ matrix.ClusterName }} (create)
     needs: pre-deploy
