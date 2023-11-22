@@ -13,11 +13,12 @@ github_repo = github_api.get_repo(os.environ.get('GITHUB_REPOSITORY'))
 #         github_repo.delete_environment(environment.id)
 print("CLUSTERS_MATRIX:")
 print(os.environ.get('CLUSTERS_MATRIX'))
-print("CLUSTERS_MATRIX.replace:")
-print(os.environ.get('CLUSTERS_MATRIX').replace('\\', ''))
+print("CLUSTERS_MATRIX.repr:")
+print(repr(os.environ.get('CLUSTERS_MATRIX')))
 
 clusters_matrix = json.loads(os.environ.get('CLUSTERS_MATRIX'), object_hook=lambda d: SimpleNamespace(**d))
 print("clusters_matrix:")
+clusters_matrix= json.loads(clusters_matrix, object_hook=lambda d: SimpleNamespace(**d))
 print(clusters_matrix)
 for cluster in clusters_matrix.include:
     if cluster.ClusterName.endswith("_tmp"):
