@@ -1,10 +1,10 @@
-import os
 import json
+import os
 from types import SimpleNamespace
-from github import Github
-from github import Auth
 
-# convert GITHUB_CONTEXT to object
+import github_action_utils as gha_utils
+from github import Auth, Github
+
 github_context = json.loads(os.environ.get("GITHUB_CONTEXT"), object_hook=lambda d: SimpleNamespace(**d))
 
 
@@ -19,73 +19,48 @@ github_repo = github_api.get_repo(github_context.repository)
 
 
 if github_context.event_name == "pull_request":
-    print("pull request")
-    max_parallel = 5
     pr = github_repo.get_pull(github_context.event.number)
-    print("pr files:")
     for file in pr.get_files():
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
+            cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id + "_tmp"
             if file.status == "added":
-                print("added cluster files:")
-                print("    " + file.filename)
-                cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id + "_tmp"
+                gha_utils.notice(message=cluster_name + " need to be created", title="Added cluster", file=file.filename)
                 content = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
-                download_url = content.download_url
-                create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
+                create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": content.download_url, "ChangeType": "Create"}]
             if file.status == "modified":
-                print("modified cluster files:")
-                print("    " + file.filename)
-                cluster_name = os.path.basename(file.filename).replace(".yaml", "_") + github_context.run_id + "_tmp"
+                gha_utils.notice(message=cluster_name + " need to be updated", title="Modified cluster", file=file.filename)
                 previous_content = pr.base.repo.get_contents(file.filename, ref=github_context.base_ref)
-                download_url = previous_content.download_url
-                create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
+                create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": previous_content.download_url, "ChangeType": "Create"}]
                 content = pr.head.repo.get_contents(file.filename, ref=github_context.head_ref)
-                download_url = content.download_url
-                update_clusters_matrix["include"] = update_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Update"}]
+                update_clusters_matrix["include"] = update_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": content.download_url, "ChangeType": "Update"}]
             if file.status == "deleted":
-                print("deleted cluster files:")
-                print("    " + file.filename)
-                print("delete cluster is not allowed")
+                gha_utils.notice(message=cluster_name + " need to be deleted", title="Deleted cluster", file=file.filename)
+                gha_utils.warning("Delete cluster is not allowed", "Deleted cluster", file.filename)
 elif github_context.event_name == "push":
-    print("On tag pushe")
     is_ephemeral = False
     commit = github_repo.get_commit(sha=github_context.sha)
-    print("commit files:")
     for file in commit.files:
         if file.filename.startswith("clusters/") and file.filename.endswith(".yaml"):
+            cluster_name = os.path.basename(file.filename).replace(".yaml", "")
             if file.status == "added" or file.status == "modified":
                 content = github_repo.get_contents(file.filename, ref=github_context.ref)
-                download_url = content.download_url
             if file.status == "added":
-                print("added cluster files:")
-                print("    " + file.filename)
-                cluster_name = os.path.basename(file.filename).replace(".yaml", "")
-                create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Create"}]
+                gha_utils.notice(message=cluster_name + " need to be created", title="Added cluster", file=file.filename)
+                create_clusters_matrix["include"] = create_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": content.download_url, "ChangeType": "Create"}]
             if file.status == "modified":
-                print("modified cluster files:")
-                print("    " + file.filename)
-                cluster_name = os.path.basename(file.filename).replace(".yaml", "")
-                update_clusters_matrix["include"] = update_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": download_url, "ChangeType": "Update"}]
+                gha_utils.notice(message=cluster_name + " need to be updated", title="Modified cluster", file=file.filename)
+                update_clusters_matrix["include"] = update_clusters_matrix.get("include", []) + [{"ClusterName": cluster_name, "ManifestUrl": content.download_url, "ChangeType": "Update"}]
             if file.status == "deleted":
-                print("deleted cluster files:")
-                print("    " + file.filename)
-                print("delete cluster is not allowed")
+                gha_utils.notice(message=cluster_name + " need to be deleted", title="Deleted cluster", file=file.filename)
+                gha_utils.warning("Delete cluster is not allowed", "delete-cluster", file.filename)
 else:
-    print("Not supported event")
+    gha_utils.error("Not supported event: " + github_context.event_name)
     exit(1)
 
-# Set Github Output
-createClustersMatrixString = json.dumps(create_clusters_matrix).strip().replace(" ", "")
-updateClustersMatrixString = json.dumps(update_clusters_matrix).strip().replace(" ", "")
-with open(os.environ.get("GITHUB_OUTPUT"), "a") as f:
-    f.write("max-parallel=" + str(max_parallel))
-    f.write("\n")
-    f.write("create-clusters-matrix=" + createClustersMatrixString)
-    f.write("\n")
-    f.write("update-clusters-matrix=" + updateClustersMatrixString)
-    f.write("\n")
-    f.write("is-ephemeral=" + str(is_ephemeral).lower())
-    f.write("\n")
-    f.write("need-create-clusters=" + str(len(create_clusters_matrix["include"]) > 0).lower())
-    f.write("\n")
-    f.write("need-update-clusters=" + str(len(update_clusters_matrix["include"]) > 0).lower())
+# Set Github Outputs
+gha_utils.set_output("max-parallel", str(max_parallel))
+gha_utils.set_output("create-clusters-matrix", json.dumps(create_clusters_matrix))
+gha_utils.set_output("update-clusters-matrix", json.dumps(update_clusters_matrix))
+gha_utils.set_output("is-ephemeral", str(is_ephemeral).lower())
+gha_utils.set_output("need-create-clusters", str(len(create_clusters_matrix["include"]) > 0).lower())
+gha_utils.set_output("need-update-clusters", str(len(update_clusters_matrix["include"]) > 0).lower())

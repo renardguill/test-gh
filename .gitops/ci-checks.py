@@ -1,8 +1,9 @@
 import os
 import sys
-import yaml
 from glob import glob
+
 import github_action_utils as gha_utils
+import yaml
 
 if len(sys.argv) < 2:
     gha_utils.error("No arguments passed")
