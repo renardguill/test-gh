@@ -25,6 +25,8 @@ for cluster in clusters_matrix.include:
         print("delete environment: " + cluster.ClusterName)
         github_repo.delete_environment(cluster.ClusterName)
 
+print("total environments: " + str(github_repo.get_environments().totalCount))
+print("page size: " + str(len(github_repo.get_environments())))
 for environment in github_repo.get_environments():
     if environment.name != "cluster-1":
         print("delete environment: " + environment.name)
