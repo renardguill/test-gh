@@ -1,9 +1,9 @@
-name: cluster-5
+name: cluster-21
 provider: OVH
 endpoint: "https://foo.lucca.tech:443"
 secretStore: "s3://toto"
-talosVersion: "v1.5"
-kubeVersion: "v1.28"
+talosVersion: "v1.6"
+kubeVersion: "v1.29"
 contolPlaneNodes:
   - name: foobar001
     type: Baremetal
