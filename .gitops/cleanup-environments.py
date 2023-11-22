@@ -28,8 +28,8 @@ for cluster in clusters_matrix.include:
 print("total environments: " + str(github_repo.get_environments().totalCount))
 i = 0
 for environment in github_repo.get_environments():
-    i += 1
     if environment.name != "cluster-1":
         print("delete environment: " + environment.name)
-        # github_repo.delete_environment(environment.name)
-print("total environments processed: " + str(i))
+        github_repo.delete_environment(environment.name)
+        i += 1
+print("total environments deleted: " + str(i))
