@@ -119,6 +119,7 @@ jobs:
   cleanup-ephemaral-clusters:
     name: Cleanup ephemeral environments
     needs: ["pre-deploy", "create-cluster", "update-cluster"]
+    permissions: write-all
     if: ${{ needs.pre-deploy.outputs.create-clusters-matrix != '' && needs.pre-deploy.outputs.is-ephemeral }}
     runs-on: ubuntu-latest
     steps:
