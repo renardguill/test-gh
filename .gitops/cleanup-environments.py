@@ -31,5 +31,5 @@ for environment in github_repo.get_environments():
     i += 1
     if environment.name != "cluster-1":
         print("delete environment: " + environment.name)
-        github_repo.delete_environment(environment.name)
+        # github_repo.delete_environment(environment.name)
 print("total environments processed: " + str(i))
