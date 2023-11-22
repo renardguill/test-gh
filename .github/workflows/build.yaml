@@ -121,6 +121,9 @@ jobs:
     needs: ["pre-deploy", "create-cluster", "update-cluster"]
     if: ${{ needs.pre-deploy.outputs.create-clusters-matrix != '' && needs.pre-deploy.outputs.is-ephemeral }}
     runs-on: ubuntu-latest
+    permissions: 
+      deployments: write
+      pull-requests: read
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
