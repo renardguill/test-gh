@@ -4,12 +4,9 @@ from types import SimpleNamespace
 from github import Github
 from github import Auth
 
-# convert GITHUB_CONTEXT to object
-github_context = json.loads(os.environ.get('GITHUB_CONTEXT'), object_hook=lambda d: SimpleNamespace(**d))
-
-auth = Auth.Token(github_context.token)
+auth = Auth.Token(os.environ.get('GITHUB_TOKEN'))
 github_api = Github(auth=auth)
-github_repo = github_api.get_repo(github_context.repository)
+github_repo = github_api.get_repo(os.environ.get('GITHUB_REPOSITORY'))
 
 # for environment in github_repo.get_environments():
 #     if environment.name.endswith("_tmp"):

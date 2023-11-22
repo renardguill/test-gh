@@ -21,7 +21,7 @@ jobs:
     - name: Install Python dependencies
       run: pip install -r .gitops/requirements.txt
     - name: Check files names according clusters names
-      run: env && python .gitops/ci-checks.py --check-files-namesj
+      run: python .gitops/ci-checks.py --check-files-names
   pre-deploy:
     name: Pre-deploy
     needs: ci-checks
@@ -134,3 +134,4 @@ jobs:
       run: python .gitops/cleanup-environments.py
       env:
         CLUSTERS_MATRIX: ${{ toJson(needs.pre-deploy.outputs.create-clusters-matrix) }}
+        GITHUB_TOKEN: ${{ github.token }}
