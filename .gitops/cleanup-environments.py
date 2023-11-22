@@ -10,7 +10,7 @@ repository_name = os.path.basename(repository_fullname)
 
 
 app_id = os.environ.get("GITHUB_APP_ID")
-private_key = os.environ.get("GITHUB_PRIVATE_KEY")
+private_key = os.environ.get("GITHUB_APP_PRIVATE_KEY")
 
 app_auth = Auth.AppAuth(app_id, private_key)
 github_intergration = GithubIntegration(auth=app_auth)
