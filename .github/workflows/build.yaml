@@ -33,7 +33,6 @@ jobs:
       need-update-clusters: ${{ fromJson(steps.set-matrix.outputs.need-update-clusters) }}
       is-ephemeral: ${{ fromJson(steps.set-matrix.outputs.is-ephemeral) }}
       max-parallel: ${{ steps.set-matrix.outputs.max-parallel }}
-    # permissions: TODO
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -119,7 +118,6 @@ jobs:
   cleanup-ephemaral-clusters:
     name: Cleanup ephemeral environments
     needs: ["pre-deploy", "create-cluster", "update-cluster"]
-    permissions: write-all
     if: ${{ needs.pre-deploy.outputs.create-clusters-matrix != '' && needs.pre-deploy.outputs.is-ephemeral }}
     runs-on: ubuntu-latest
     steps:
