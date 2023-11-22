@@ -13,7 +13,7 @@ github_repo = github_api.get_repo(os.environ.get('GITHUB_REPOSITORY'))
 #         github_repo.delete_environment(environment.id)
 
 clusters_matrix = json.loads(os.environ.get('CLUSTERS_MATRIX'), object_hook=lambda d: SimpleNamespace(**d))
-for cluster in clusters_matrix["include"]:
+for cluster in clusters_matrix.get("include", []):
     if cluster.ClusterName.endswith("_tmp"):
         environmentId = github_repo.get_environment(cluster.ClusterName).id
         github_repo.delete_environment(environmentId)
