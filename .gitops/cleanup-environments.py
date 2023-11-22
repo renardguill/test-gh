@@ -19,12 +19,14 @@ github_api = installation.get_github_for_installation()
 
 github_repo = github_api.get_repo(repository_fullname)
 
-# for environment in github_repo.get_environments():
-#     if environment.name.endswith("_tmp"):
-#         print("delete environment: " + environment.name)
-#         github_repo.delete_environment(environment.name)
-
 clusters_matrix = json.loads(json.loads(os.environ.get("CLUSTERS_MATRIX")), object_hook=lambda d: SimpleNamespace(**d))
 for cluster in clusters_matrix.include:
     if cluster.ClusterName.endswith("_tmp"):
+        print("delete environment: " + cluster.ClusterName)
         github_repo.delete_environment(cluster.ClusterName)
+
+for environment in github_repo.get_environments():
+    if environment.name != "cluster-1":
+        print("delete environment: " + environment.name)
+        github_repo.delete_environment(environment.name)
+
