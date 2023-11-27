@@ -1,12 +1,12 @@
-name: Luccakube
-run-name: Luccakube on GitHub Actions 🚀
+name: LuccaKube.GitOps 💫
+run-name: LuccaKube.GitOps 💫
 on:
   pull_request:
     branches:
       - "*"
   push:
-    tags:
-      - "*"
+    branches:
+      - "main"
 jobs:
   ci-checks:
     name: CI checks
@@ -49,9 +49,38 @@ jobs:
       run: python3 .gitops/create-matrix.py
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
+  dryrun-cluster:
+    name: ${{ matrix.ClusterName }} (dryrun)
+    needs: pre-deploy
+    # TODO check matrix instead of boolean value
+    if:  ${{ fromJson(needs.pre-deploy.outputs.need-create-clusters) }}
+    runs-on: ubuntu-latest
+    concurrency: ${{ matrix.ClusterName }}
+    strategy:
+      matrix: ${{ fromJson(needs.pre-deploy.outputs.create-clusters-matrix) }}
+      max-parallel: ${{ fromJson(needs.pre-deploy.outputs.max-parallel) }}
+    environment: 
+      name: ${{ matrix.ClusterName }}
+      url: https://${{ matrix.ClusterName }}.luccakube.tech
+    steps:
+    - name: dryrun ${{ matrix.ClusterName }}
+      run: |
+        curl -sL \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${{ github.token }}" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        ${{ matrix.ManifestUrl }} -o ${{ matrix.ClusterName }}.yaml
+        cat ${{ matrix.ClusterName }}.yaml
+        echo '## 🧪 Dryrun on ${{ matrix.ClusterName }}' >> $GITHUB_STEP_SUMMARY
+        echo 'These changes will be applied: ' >> $GITHUB_STEP_SUMMARY
+        echo '* Talos v1.5 => v1.6' >> $GITHUB_STEP_SUMMARY
+        echo '* Kubernetes v1.27.1 => v1.27.3' >> $GITHUB_STEP_SUMMARY
+        echo '* Number of nodes:' >> $GITHUB_STEP_SUMMARY
+        echo '  * ControlPlanes: 3 => 4' >> $GITHUB_STEP_SUMMARY
+        echo '  * Workers: 8 => 12' >> $GITHUB_STEP_SUMMARY
   create-cluster:
     name: ${{ matrix.ClusterName }} (create)
-    needs: pre-deploy
+    needs: [pre-deploy, dryrun-cluster]
     # TODO check matrix instead of boolean value
     if:  ${{ fromJson(needs.pre-deploy.outputs.need-create-clusters) }}
     runs-on: ubuntu-latest
@@ -71,20 +100,9 @@ jobs:
         -H "X-GitHub-Api-Version: 2022-11-28" \
         ${{ matrix.ManifestUrl }} -o ${{ matrix.ClusterName }}.yaml
         cat ${{ matrix.ClusterName }}.yaml
-      env:
-        TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
-        OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
-        OS_IDENTITY_API_VERSION: ${{ vars.OS_IDENTITY_API_VERSION }}
-        OS_DOMAIN_NAME: ${{ vars.OS_DOMAIN_NAME }}
-        OS_TENANT_ID: ${{ secrets.OS_TENANT_ID }}
-        OS_TENANT_NAME: ${{ secrets.OS_TENANT_NAME }}
-        OS_USERNAME: ${{ secrets.OS_USERNAME }}
-        OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
-        OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
-        OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   update-cluster:
     name: ${{ matrix.ClusterName }} (update)
-    needs: ["pre-deploy", "create-cluster"]
+    needs: ["pre-deploy", "create-cluster", "dryrun-cluster"]
     # TODO check matrix instead of boolean value
     if: ${{ fromJson(needs.pre-deploy.outputs.need-update-clusters) }}
     runs-on: ubuntu-latest
@@ -104,17 +122,6 @@ jobs:
           -H "X-GitHub-Api-Version: 2022-11-28" \
           ${{ matrix.ManifestUrl }} -o ${{ matrix.ClusterName }}.yaml
         cat ${{ matrix.ClusterName }}.yaml
-      env:
-        TALOS_SECRETS_BUNDLE: ${{ secrets.TALOS_SECRETS_BUNDLE }}
-        OS_AUTH_URL: ${{ vars.OS_AUTH_URL }}
-        OS_IDENTITY_API_VERSION: ${{ vars.OS_IDENTITY_API_VERSION }}
-        OS_DOMAIN_NAME: ${{ vars.OS_DOMAIN_NAME }}
-        OS_TENANT_ID: ${{ secrets.OS_TENANT_ID }}
-        OS_TENANT_NAME: ${{ secrets.OS_TENANT_NAME }}
-        OS_USERNAME: ${{ secrets.OS_USERNAME }}
-        OS_PASSWORD: ${{ secrets.OS_PASSWORD }}
-        OS_REGION_NAME: ${{ vars.OS_REGION_NAME }}
-        OVH_API_CREDS: ${{ secrets.OVH_API_CREDS }}
   cleanup-ephemaral-clusters:
     name: Cleanup ephemeral environments
     needs: ["pre-deploy", "create-cluster", "update-cluster"]
