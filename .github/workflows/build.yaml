@@ -82,7 +82,7 @@ jobs:
         echo '  * Workers: 8 => 12' >> $GITHUB_STEP_SUMMARY
   create-cluster:
     name: ${{ matrix.ClusterName }} (create)
-    needs: [pre-deploy, dryrun-cluster]
+    needs: [pre-deploy]
     # TODO check matrix instead of boolean value
     if:  ${{ fromJson(needs.pre-deploy.outputs.need-create-clusters) }}
     runs-on: ubuntu-latest
@@ -104,7 +104,7 @@ jobs:
         cat ${{ matrix.ClusterName }}.yaml
   update-cluster:
     name: ${{ matrix.ClusterName }} (update)
-    needs: ["pre-deploy", "create-cluster", "dryrun-cluster"]
+    needs: ["pre-deploy", "create-cluster"]
     # TODO check matrix instead of boolean value
     if: ${{ fromJson(needs.pre-deploy.outputs.need-update-clusters) }}
     runs-on: ubuntu-latest
