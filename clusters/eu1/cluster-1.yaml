@@ -3,7 +3,7 @@ provider: OVH
 endpoint: "https://foo.lucca.tech:443"
 secretStore: "s3://totos"
 talosVersion: "v1.7"
-kubeVersion: "v1.28"
+kubeVersion: "v1.27"
 contolPlaneNodes:
   - name: foobar001
     type: Baremetal
