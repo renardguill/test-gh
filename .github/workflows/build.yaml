@@ -31,6 +31,8 @@ jobs:
       need-create-clusters: ${{ fromJson(steps.set-matrix.outputs.need-create-clusters) }}
       update-clusters-matrix: ${{ steps.set-matrix.outputs.update-clusters-matrix }}
       need-update-clusters: ${{ fromJson(steps.set-matrix.outputs.need-update-clusters) }}
+      dryrun-clusters-matrix: ${{ steps.set-matrix.outputs.dryrun-clusters-matrix }}
+      need-dryrun-clusters: ${{ fromJson(steps.set-matrix.outputs.need-dryrun-clusters) }}
       is-ephemeral: ${{ fromJson(steps.set-matrix.outputs.is-ephemeral) }}
       max-parallel: ${{ steps.set-matrix.outputs.max-parallel }}
     steps:
@@ -53,11 +55,11 @@ jobs:
     name: ${{ matrix.ClusterName }} (dryrun)
     needs: pre-deploy
     # TODO check matrix instead of boolean value
-    if:  ${{ fromJson(needs.pre-deploy.outputs.need-create-clusters) }}
+    if:  ${{ fromJson(needs.pre-deploy.outputs.need-dryrun-clusters) }}
     runs-on: ubuntu-latest
     concurrency: ${{ matrix.ClusterName }}
     strategy:
-      matrix: ${{ fromJson(needs.pre-deploy.outputs.create-clusters-matrix) }}
+      matrix: ${{ fromJson(needs.pre-deploy.outputs.dryrun-clusters-matrix) }}
       max-parallel: ${{ fromJson(needs.pre-deploy.outputs.max-parallel) }}
     environment: 
       name: ${{ matrix.ClusterName }}
