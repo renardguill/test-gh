@@ -55,7 +55,7 @@ jobs:
     name: ${{ matrix.ClusterName }} (dryrun)
     needs: pre-deploy
     # TODO check matrix instead of boolean value
-    if:  ${{ needs.pre-deploy.outputs.need-dryrun-clusters }}
+    if:  ${{ fromJson(needs.pre-deploy.outputs.need-dryrun-clusters) }}
     runs-on: ubuntu-latest
     concurrency: ${{ matrix.ClusterName }}
     strategy:
@@ -84,7 +84,7 @@ jobs:
     name: ${{ matrix.ClusterName }} (create)
     needs: [pre-deploy]
     # TODO check matrix instead of boolean value
-    if:  ${{ needs.pre-deploy.outputs.need-create-clusters }}
+    if:  ${{ fromJson(needs.pre-deploy.outputs.need-create-clusters) }}
     runs-on: ubuntu-latest
     concurrency: ${{ matrix.ClusterName }}
     strategy:
@@ -106,7 +106,7 @@ jobs:
     name: ${{ matrix.ClusterName }} (update)
     needs: ["pre-deploy", "create-cluster"]
     # TODO check matrix instead of boolean value
-    if: ${{ needs.pre-deploy.outputs.need-update-clusters }}
+    if: ${{ fromJson(needs.pre-deploy.outputs.need-update-clusters) }}
     runs-on: ubuntu-latest
     concurrency: ${{ matrix.ClusterName }}
     strategy:
